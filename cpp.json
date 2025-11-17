@@ -1,0 +1,60 @@
+{
+    "comp": {
+        "prefix": "comp",
+        "body": [
+            "#ifdef ONPC",
+            "    #define _GLIBCXX_DEBUG",
+            "#endif",
+            "",
+            "#include <bits/stdc++.h>",
+            "using namespace std;",
+            "",
+            "#define ll long long",
+            "#define ld long double",
+            "#define vec vector",
+            "#define ii pair<int,int>",
+            "",
+            "#define all(a) a.begin(), a.end()",
+            "",
+            "#define FOR(a,b,c) for(int a = (b); a != (c); (a < (c) ? a++ : a--))",
+            "",
+            "mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());",
+            "",
+            "",
+            "int32_t main() {",
+            "    ios::sync_with_stdio(0);",
+            "    cin.tie(0);",
+            "",
+            "    $0",
+            "",
+            "    return 0;",
+            "}"
+        ],
+        "description": "comp snippet"
+    },
+    "t_times": {
+        "prefix": "tt",
+        "body": [
+            "int cases; cin >> cases;",
+            "while (cases--) {",
+            "    $0",
+            "}"
+        ],
+        "description": "binary search"
+    },
+    "bin_search": {
+        "prefix": "bins",
+        "body": [
+            "// array is ${1:arr} || target is ${2:target}",
+            "int bl = 0, br = $1.size() - 1;",
+            "int bmid;",
+            "while (bl <= br) {",
+            "    bmid = bl + ((br - bl) >> 1);",
+            "    if ($2 == $1[bmid]) { break; }",
+            "    else if ($2 < $1[bmid]) br = bmid - 1;",
+            "    else bl = bmid + 1;",
+            "}"
+        ],
+        "description": "binary search"
+    }
+} 
