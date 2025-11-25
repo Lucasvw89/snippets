@@ -56,5 +56,19 @@
             "}"
         ],
         "description": "binary search"
+    },
+    "primes": {
+        "prefix": "primes",
+        "body": [
+            "vec<bool> is_prime(${1:n}+1,true);",
+            "is_prime[0] = false;",
+            "is_prime[1] = false;", 
+            "for (int _1 = 2; _1*_1 <= n; _1++) {",
+            "   if (is_prime[_1]) {",
+            "       for (int _2 = _1*_1; _2 <= n; _2+=_1) is_prime[_2] = false;",
+            "   }",
+            "}"
+        ],
+        "description": "sieve of eratosthenes"
     }
 } 
