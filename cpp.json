@@ -2,24 +2,23 @@
     "comp": {
         "prefix": "comp",
         "body": [
-            "#ifdef ONPC",
-            "    #define _GLIBCXX_DEBUG",
-            "#endif",
-            "",
             "#include <bits/stdc++.h>",
             "using namespace std;",
             "",
             "#define ll long long",
-            "#define ld long double",
+            "#define ld double",
             "#define vec vector",
             "#define ii pair<int,int>",
             "",
             "#define all(a) a.begin(), a.end()",
-            "",
             "#define FOR(a,b,c) for(int a = (b); a != (c); (a < (c) ? a++ : a--))",
             "",
             "mt19937 rng(chrono::steady_clock::now().time_since_epoch().count());",
             "",
+            "ll get_rand(ll l, ll r) {",
+            "    uniform_int_distribution<ll> dist(l, r);",
+            "    return dist(rng);",
+            "}",
             "",
             "int32_t main() {",
             "    ios::sync_with_stdio(0);",
@@ -30,7 +29,7 @@
             "    return 0;",
             "}"
         ],
-        "description": "comp snippet"
+        "description": "template"
     },
     "t_times": {
         "prefix": "tt",
@@ -40,7 +39,7 @@
             "    $0",
             "}"
         ],
-        "description": "binary search"
+        "description": "tt"
     },
     "bin_search": {
         "prefix": "bins",
@@ -55,69 +54,268 @@
             "    else bl = bmid + 1;",
             "}"
         ],
-        "description": "binary search"
+        "description": "Binary Search"
     },
-    "dsu" :{
+    "dsu": {
         "prefix": "DSU",
         "body": [
             "struct DSU {",
-            "    int n;",
+            "    int n, num_sets;",
             "    vector<int> p, sz;",
             "",
-            "    DSU(int n) : n(n), p(n), sz(n, 1) {",
+            "    DSU(int n) : n(n), num_sets(n), p(n), sz(n, 1) {",
             "        iota(p.begin(), p.end(), 0);",
             "    }",
             "",
             "    int find(int x) {",
             "        if (x == p[x]) return x;",
-            "        return x = find(p[x]);",
+            "        return p[x] = find(p[x]);",
             "    }",
             "",
             "    bool unite(int a, int b) {",
-            "        a = find(a);",
-            "        b = find(b);",
+            "        a = find(a); b = find(b);",
             "        if (a == b) return false;",
             "        if (sz[a] < sz[b]) swap(a, b);",
             "        p[b] = a;",
             "        sz[a] += sz[b];",
+            "        num_sets--;",
             "        return true;",
+            "    }",
+            "",
+            "    int size(int x) { return sz[find(x)]; }",
+            "};"
+        ],
+        "description": "DSU"
+    },
+    "primes_sieve": {
+        "prefix": "sieve",
+        "body": [
+            "int n_sieve = ${1:1e7 + 10};",
+            "vector<bool> is_prime(n_sieve, true);",
+            "is_prime[0] = is_prime[1] = false;",
+            "for (int i = 2; i * i < n_sieve; i++) {",
+            "    if (is_prime[i]) {",
+            "        for (int j = i * i; j < n_sieve; j += i) is_prime[j] = false;",
+            "    }",
+            "}",
+            "vector<ll> primes;",
+            "for (int i = 2; i < n_sieve; i++) if (is_prime[i]) primes.push_back(i);"
+        ],
+        "description": "Sieve of Eratosthenes"
+    },
+    "modular_arithmetic": {
+        "prefix": "ARITMOD",
+        "body": [
+            "const int MOD = 1e9 + 7;",
+            "ll mod_add(ll a, ll b) { return (a + b) % MOD; }",
+            "ll mod_sub(ll a, ll b) { return (a - b + MOD) % MOD; }",
+            "ll mod_mul(ll a, ll b) { return (a * 1LL * b) % MOD; }",
+            "",
+            "ll fexp(ll base, ll exp) {",
+            "    ll res = 1; base %= MOD;",
+            "    while (exp > 0) {",
+            "        if (exp % 2 == 1) res = mod_mul(res, base);",
+            "        base = mod_mul(base, base);",
+            "        exp /= 2;",
+            "    }",
+            "    return res;",
+            "}",
+            "",
+            "ll inv(ll a) { return fexp(a, MOD - 2); }",
+            "",
+            "ll fact[${1:MAXN}], inv_fact[$1];",
+            "void precompute_fact(int n) {",
+            "    fact[0] = 1;",
+            "    for (int i = 1; i <= n; i++) fact[i] = mod_mul(fact[i - 1], i);",
+            "    inv_fact[n] = inv(fact[n]);",
+            "    for (int i = n - 1; i >= 0; i--) inv_fact[i] = mod_mul(inv_fact[i + 1], i + 1);",
+            "}",
+            "",
+            "ll nCr(int n, int r) {",
+            "    if (r < 0 || r > n) return 0;",
+            "    return mod_mul(fact[n], mod_mul(inv_fact[r], inv_fact[n - r]));",
+            "}"
+        ],
+        "description": "Modular Arithmetic and Combinatorics"
+    },
+    "segtree": {
+        "prefix": "segtree",
+        "body": [
+            "template <typename T>",
+            "struct segtree {",
+            "    vector<T> v; int n; T ID; T (*combine)(T, T);",
+            "    segtree(const vector<T>& temp, T id, T (*func)(T, T))",
+            "        : n(temp.size()), ID(id), combine(func) {",
+            "        v.assign(2 * n, ID);",
+            "        for (int i = 0; i < n; i++) v[n + i] = temp[i];",
+            "        build();",
+            "    }",
+            "    void build() {",
+            "        for (int i = n - 1; i > 0; --i) v[i] = combine(v[i<<1], v[i<<1|1]);",
+            "    }",
+            "    void update(int p, const T& value) {",
+            "        for (v[p += n] = value; p >>= 1; ) v[p] = combine(v[p<<1], v[p<<1|1]);",
+            "    }",
+            "    T query(int l, int r) {",
+            "        T resl = ID, resr = ID;",
+            "        for (l += n, r += n; l < r; l >>= 1, r >>= 1) {",
+            "            if (l&1) resl = combine(resl, v[l++]);",
+            "            if (r&1) resr = combine(v[--r], resr);",
+            "        }",
+            "        return combine(resl, resr);",
             "    }",
             "};"
         ],
-        "description": "dsu impl"
+        "description": "THE SIGMATREE"
     },
-    "primes": {
-        "prefix": "primes",
+    "fenwick_tree": {
+        "prefix": "BIT",
         "body": [
-            "int ${1:x} = 1e7 + 10;",
-            "vec<bool> is_prime($1,true);",
-            "is_prime[0] = is_prime[1] = false;",
-            "for (int _1 = 2; _1*_1 <= $1; _1++) {",
-            "    if (is_prime[_1]) {",
-            "        for (int _2 = _1*_1; _2 <= $1; _2+=_1) is_prime[_2] = false;",
+            "struct BIT {",
+            "    int n; vector<ll> tree;",
+            "    BIT(int n) : n(n), tree(n + 1, 0) {}",
+            "    void update(int i, ll val) {",
+            "        for (++i; i <= n; i += i & -i) tree[i] += val;",
             "    }",
-            "}",
-            "vec<ll> primes;",
-            "FOR(i,2,x) {",
-            "    if (is_prime[i]) primes.push_back(i);",
+            "    ll query(int i) {",
+            "        ll sum = 0; for (++i; i > 0; i -= i & -i) sum += tree[i];",
+            "        return sum;",
+            "    }",
+            "    ll query(int l, int r) { return query(r) - query(l - 1); }",
+            "};"
+        ],
+        "description": "Fenwick Tree (BIT)"
+    },
+    "hashing": {
+        "prefix": "hash",
+        "body": [
+            "struct Hash {",
+            "    static const ll MOD1 = 1e9 + 7, MOD2 = 1e9 + 9;",
+            "    static const ll P1 = 31, P2 = 37;",
+            "    vector<ll> h1, h2, p1, p2;",
+            "    Hash(const string& s) : h1(s.size() + 1, 0), h2(s.size() + 1, 0),",
+            "                            p1(s.size() + 1, 1), p2(s.size() + 1, 1) {",
+            "        for (int i = 0; i < (int)s.size(); i++) {",
+            "            h1[i + 1] = (h1[i] * P1 + s[i]) % MOD1;",
+            "            h2[i + 1] = (h2[i] * P2 + s[i]) % MOD2;",
+            "            p1[i + 1] = (p1[i] * P1) % MOD1;",
+            "            p2[i + 1] = (p2[i] * P2) % MOD2;",
+            "        }",
+            "    }",
+            "    pair<ll, ll> get(int l, int r) {",
+            "        ll res1 = (h1[r + 1] - h1[l] * p1[r - l + 1] % MOD1 + MOD1) % MOD1;",
+            "        ll res2 = (h2[r + 1] - h2[l] * p2[r - l + 1] % MOD2 + MOD2) % MOD2;",
+            "        return {res1, res2};",
+            "    }",
+            "};"
+        ],
+        "description": "Double String Hashing"
+    },
+    "trie": {
+        "prefix": "TRIE",
+        "body": [
+            "struct Trie {",
+            "    vector<vector<int>> trie;",
+            "    vector<int> count;",
+            "    int nodes = 1;",
+            "    Trie(int max_len) : trie(max_len, vector<int>(26, 0)), count(max_len, 0) {}",
+            "    void insert(const string& s) {",
+            "        int curr = 0;",
+            "        for (char c : s) {",
+            "            int v = c - 'a';",
+            "            if (!trie[curr][v]) trie[curr][v] = nodes++;",
+            "            curr = trie[curr][v];",
+            "        }",
+            "        count[curr]++;",
+            "    }",
+            "    bool search(const string& s) {",
+            "        int curr = 0;",
+            "        for (char c : s) {",
+            "            int v = c - 'a';",
+            "            if (!trie[curr][v]) return false;",
+            "            curr = trie[curr][v];",
+            "        }",
+            "        return count[curr] > 0;",
+            "    }",
+            "};"
+        ],
+        "description": "TRIE"
+    },
+    "get_divisors": {
+        "prefix": "DIVS",
+        "body": [
+            "vector<int> getdivisors(int n) {",
+            "    vector<int> divisors;",
+            "    for (int i = 1; i * i <= n; i++) {",
+            "        if (n % i == 0) {",
+            "            divisors.push_back(i);",
+            "            if (i != n / i) divisors.push_back(n / i);",
+            "        }",
+            "    }",
+            "    return divisors;",
             "}"
         ],
-        "description": "sieve of eratosthenes"
+        "description": "Get all divisors of n"
+    },
+    "prime_factorization": {
+        "prefix": "PFAC",
+        "body": [
+            "// Precompute prime factors for range [1, N]",
+            "// ${1:Option 1: Unique Factors Only}",
+            "for (int i = 2; i <= N; i++) {",
+            "    if (!pfac[i].empty()) continue;",
+            "    for (int j = i; j <= N; j += i) pfac[j].push_back(i);",
+            "}",
+            "",
+            "// ${2:Option 2: With Exponents}",
+            "/*",
+            "for (int i = 2; i <= N; i++) {",
+            "    if (!pfac[i].empty()) continue;",
+            "    for (int j = i; j <= N; j += i) {",
+            "        int temp = j;",
+            "        while (temp % i == 0) { pfac[j].push_back(i); temp /= i; }",
+            "    }",
+            "}",
+            "*/"
+        ],
+        "description": "Linear-ish prime factorization precomputation"
+    },
+    "PointStruct": {
+        "prefix": "POINT",
+        "body": [
+            "struct point {",
+            "    double x, y;",
+            "    bool operator == (point const& t) const {",
+            "        return x == t.x && y == t.y;",
+            "    }",
+            "};"
+        ],
+        "description": "2D Point structure"
     },
     "PolygonAreaFunction": {
         "prefix": "polyarea",
         "body": [
-        "ld area(const vector<point> &P) {",
-        "    ld result = 0.0, x1, y1, x2, y2;",
-        "    for (int i = 0; i < (int)P.size() - 1; i++) {",
-        "        x1 = P[i].x; x2 = P[i+1].x;",
-        "        y1 = P[i].y; y2 = P[i+1].y;",
-        "        result += (x1 * y2 - x2 * y1);",
-        "    }",
-        "    return fabsl(result) / 2.0;",
-        "}"
+            "ld area(const vector<point> &P) {",
+            "    ld result = 0.0;",
+            "    int N = P.size();",
+            "    for (int i = 0; i < N; i++) {",
+            "        int next = (i + 1) % N;",
+            "        result += (P[i].x * P[next].y - P[next].x * P[i].y);",
+            "    }",
+            "    return abs(result) / 2.0;",
+            "}"
         ],
-        "description": "compute polygon area"
+        "description": "Shoelace formula for polygon area"
+    },
+    "ccw": {
+        "prefix": "ccw_snippet",
+        "body": [
+            "bool ccw(const point &a, const point &b, const point &c, bool accept_collinear = false) {",
+            "    ll cross = (ll)(b.x - a.x) * (c.y - a.y) - (ll)(b.y - a.y) * (c.x - a.x);",
+            "    return cross > 0 || (cross == 0 && accept_collinear);",
+            "}"
+        ],
+        "description": "Counter-Clockwise orientation test"
     },
     "IsConvex": {
         "prefix": "isconvex",
@@ -126,53 +324,12 @@
             "    int sz = (int)P.size();",
             "    if (sz <= 3) return false;",
             "    bool isLeft = ccw(P[0], P[1], P[2]);",
-            "    for (int i = 1; i < sz - 1; i++)",
-            "        if (ccw(P[i], P[i + 1], P[(i + 2 == sz) ? 1 : i + 2]) != isLeft)",
-            "            return false;",
+            "    for (int i = 1; i < sz; i++) {",
+            "        if (ccw(P[i], P[(i+1)%sz], P[(i+2)%sz]) != isLeft) return false;",
+            "    }",
             "    return true;",
             "}"
         ],
-        "description": "check polygon convexity"
-    },
-    "ccw": {
-        "prefix": "ccw_snippet",
-        "body": [
-            "bool ccw(const point &a, const point &b, const point &c, bool accept_collinear) {",
-            "    ll cross = (b.x - a.x) * 1LL * (c.y - a.y) - (b.y - a.y) * 1LL * (c.x - a.x);",
-            "    return cross > 0 || (cross == 0 && accept_collinear);",
-            "}"
-        ],
-        "description": "Boolean ccw with optional"
-    },
-	"InPolygonFunction": {
-		"prefix": "inpoly",
-		"body": [
-			"bool in_polygon(point pt, const vector<point> &P) {",
-			"    if (P.size() < 3) return false;",
-			"    ld sum = 0;",
-			"    int N = P.size();",
-			"    for (int i = 0; i < N; i++) {",
-			"        int next = (i + 1) % N;",
-			"        if (ccw(pt, P[i], P[next]))",
-			"            sum += angle(P[i], pt, P[next]);",
-			"        else",
-			"            sum -= angle(P[i], pt, P[next]);",
-			"    }",
-			"    return fabs(fabs(sum) - 2 * PI) < EPS;",
-			"}"
-		],
-		"description": ""
-	},
-    "PointStruct": {
-        "prefix": "ptstruct",
-        "body": [
-        "struct point {",
-        "    double x, y;",
-        "    bool operator == (point const& t) const {",
-        "        return x == t.x && y == t.y;",
-        "    }",
-        "};"
-        ],
-        "description": ""
+        "description": "Check if polygon is convex"
     }
-} 
+}
